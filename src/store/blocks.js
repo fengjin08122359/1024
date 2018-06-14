@@ -32,13 +32,13 @@ const mutations = {
     state.blocks = []
     for (var i = 0; i < level; i++) {
       for (var j = 0; j < level; j++) {
-        state.blocks[i * level + j] = new Block({index: i * level + j})
+        state.blocks[i * level + j] = 0
       }
     }
   },
   addBlock (state) {
     var currentBlocks = state.blocks.map(function (value, index) {
-      if (value.num === 0) {
+      if (value === 0) {
         return index
       } else {
         return ''
@@ -49,8 +49,7 @@ const mutations = {
     })
     var blockIndex = Math.floor(emptyBlock.length * Math.random())
     var index = emptyBlock[blockIndex]
-    console.log(index)
-    state.blocks[index] = new Block({num: 2, index: index})
+    state.blocks[index] = 2 + Math.floor(Math.random()*2)*2
     state.blocks = state.blocks.slice(0)
   },
   goStep (state, direction) {
@@ -71,53 +70,69 @@ const mutations = {
     })
     //合并
     arraySplit.forEach(function (lineSplit, index) {
-      if (direction >= 2) {
+      if (direction == 3 || direction == 2) {
         for (var i = 1; i < state.level; i++) {
-          if (lineSplit[i].num === lineSplit[i - 1].num ) {
-            lineSplit[i].num = lineSplit[i].num * 2
-            lineSplit[i - 1].num = 0
+          var isMerge = false
+          if (lineSplit[i] === lineSplit[i - 1] ) {
+            lineSplit[i] = lineSplit[i] * 2
+            lineSplit[i - 1] = 0
+            isMerge = true
           }
-          if (lineSplit[i].num == 0) {
-            lineSplit[i].num = lineSplit[i - 1].num
-            lineSplit[i - 1].num = 0
+          if (lineSplit[i] == 0) {
+            lineSplit[i] = lineSplit[i - 1]
+            lineSplit[i - 1] = 0
+          }
+          if (isMerge) {
+            i++
           }
         }
       } else {
         for (var i = state.level-2; i >= 0; i--) {
-          if (lineSplit[i].num === lineSplit[i + 1].num ) {
-            lineSplit[i].num = lineSplit[i].num * 2
-            lineSplit[i + 1].num = 0
+          var isMerge = false
+          if (lineSplit[i] === lineSplit[i + 1] ) {
+            lineSplit[i] = lineSplit[i] * 2
+            lineSplit[i + 1] = 0
+            isMerge = true
           }
-          if (lineSplit[i].num == 0) {
-            lineSplit[i].num = lineSplit[i + 1].num
-            lineSplit[i + 1].num = 0
+          if (lineSplit[i] == 0) {
+            lineSplit[i] = lineSplit[i + 1]
+            lineSplit[i + 1] = 0
+          }
+          if (isMerge) {
+            i--
           }
         }
       }
     })
     //平移
     arraySplit.forEach(function (lineSplit, index) {
-      if (direction >= 2) {
-        for (var i = 1; i < state.level; i++) {
-          if (lineSplit[i].num == 0) {
-            lineSplit[i].num = lineSplit[i - 1].num
-            lineSplit[i - 1].num = 0
-          }
+      var emptyBlock = lineSplit.filter(function (value, jindex) {
+        return value !== 0
+      })
+      var zeroLength = state.level - emptyBlock.length;
+      if (direction == 1 || direction == 0) {
+        lineSplit = emptyBlock
+        for (var i = 1; i <= zeroLength; i++) {
+          lineSplit.push(0)
         }
       } else {
-        for (var i = state.level-2; i >= 0; i--) {
-          if (lineSplit[i].num == 0) {
-            lineSplit[i].num = lineSplit[i + 1].num
-            lineSplit[i + 1].num = 0
-          }
+        lineSplit = []
+        for (var i = 1; i <= zeroLength; i++) {
+          lineSplit.push(0)
         }
+        lineSplit = lineSplit.concat(emptyBlock)
       }
+      arraySplit[index] = lineSplit
     })
     console.log(arraySplit)
     //重新展开
     arraySplit.forEach(function (lineSplit, index) {
-      lineSplit.forEach(function (value, index) {
-        state.blocks[value.index] = value
+      lineSplit.forEach(function (value, jindex) {
+        if (direction % 2 === 0) {
+          state.blocks[index * state.level + jindex] = value
+        } else {
+          state.blocks[jindex * state.level + index] = value
+        }
       })
     })
     state.blocks = state.blocks.slice(0)

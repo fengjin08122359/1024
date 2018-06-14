@@ -27,7 +27,7 @@ export default {
   },
   created () {
     var that = this
-    that.startGame(4)
+    that.startGame(6)
     window.onkeydown = function (ev) {
       console.log('onkeydown', ev.keyCode)
       if (ev.keyCode === 37) {
@@ -53,7 +53,7 @@ export default {
       return 'level0'
     },
     divHtml (i) {
-      return i.num
+      return i
     }
   }
 }
